@@ -1,0 +1,22 @@
+CMP Platform v5.0 Cloud Deploy Guide
+
+1. Supabase 가입/프로젝트 생성
+2. Supabase SQL Editor에서 supabase/schema_v5_0.sql 실행
+3. Authentication > Users에서 6명 계정 생성
+   - advisor
+   - professor
+   - admin
+   - student01
+   - student02
+   - student03
+4. Project Settings > API에서 URL / anon key 복사
+5. .env.example을 .env로 복사 후 값 입력
+6. 로컬 테스트: START_LOCAL_TEST.bat
+7. Vercel 가입
+8. GitHub에 프로젝트 업로드
+9. Vercel에서 Import Project
+10. Environment Variables에 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 입력
+11. Deploy
+
+결과:
+대표님 노트북이 꺼져도 Vercel 주소로 6명 접속 가능.

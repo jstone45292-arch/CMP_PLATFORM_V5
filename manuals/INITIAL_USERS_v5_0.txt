@@ -1,0 +1,11 @@
+Initial 6 Users
+
+1. 박진석 대표 / Advisor
+2. 김태동 교수님 / Professor
+3. 대학원생 Admin / Admin
+4. 학부생 1 / Student
+5. 학부생 2 / Student
+6. 학부생 3 / Student
+
+권장 이메일은 실제 Gmail/학교메일 사용.
+비밀번호는 Supabase에서 임시 발급 후 사용자별 변경.
