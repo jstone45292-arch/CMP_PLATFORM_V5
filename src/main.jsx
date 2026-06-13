@@ -267,6 +267,7 @@ function Measure(){
  const[remark,setRemark]=useState("");
 
  const[rows,setRows]=useState([]);
+ const[editId,setEditId]=useState(null);
 
  useEffect(()=>{
   loadMeasurements();
@@ -362,27 +363,50 @@ function Measure(){
 
    <table style={{width:"100%"}}>
 
-    <thead>
-     <tr>
-      <th>ID</th>
-      <th>Run ID</th>
-      <th>Removal</th>
-      <th>Angle</th>
-      <th>Remark</th>
-     </tr>
-    </thead>
+<thead>
+ <tr>
+  <th>ID</th>
+  <th>Run ID</th>
+  <th>Removal</th>
+  <th>Angle</th>
+  <th>Remark</th>
+  <th>Action</th>
+ </tr>
+</thead>
 
     <tbody>
 
      {rows.map(row=>
 
-      <tr key={row.id}>
-       <td>{row.id}</td>
-       <td>{row.run_id}</td>
-       <td>{row.particle_removal}</td>
-       <td>{row.contact_angle}</td>
-       <td>{row.remark}</td>
-      </tr>
+ <tr key={row.id}>
+
+ <td>{row.id}</td>
+ <td>{row.run_id}</td>
+ <td>{row.particle_removal}</td>
+ <td>{row.contact_angle}</td>
+ <td>{row.remark}</td>
+
+ <td>
+
+<button
+ className="btn"
+ onClick={()=>{
+
+  setEditId(row.id);
+
+  setRunId(row.run_id);
+  setParticleRemoval(row.particle_removal);
+  setContactAngle(row.contact_angle);
+  setRemark(row.remark||"");
+
+ }}
+>
+수정
+</button>
+
+ </td>
+
+</tr>
 
      )}
 
