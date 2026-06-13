@@ -170,12 +170,53 @@ function Header({title,sub}){
 }
 
 function Dashboard({cloud}){
- return <div className="grid cols2">
-  <div className="card">
-   <h2><Database/> 상태</h2>
-   <p className="subtle">{cloud?"Supabase Cloud 연결 모드":"로컬 데모 모드"}</p>
+
+ const [latest,setLatest]=useState(null);
+
+ useEffect(()=>{
+  if(cloud) load();
+ },[]);
+
+ async function load(){
+
+  const {data,error}=await supabase
+   .from("measurements")
+   .select("*")
+   .order("id",{ascending:false})
+   .limit(1);
+
+  if(!error && data?.length){
+   setLatest(data[0]);
+  }
+ }
+
+ return (
+  <div className="grid cols2">
+
+   <div className="card">
+    <h2><Database size={20}/> Database 상태</h2>
+    <p className="subtle">
+      {cloud ? "Supabase Cloud 연결 모드" : "로컬 데모 모드"}
+    </p>
+   </div>
+
+   <div className="card">
+    <h2><Microscope size={20}/> 최근 측정</h2>
+
+    {latest ? (
+      <>
+        <p><b>{latest.run_id}</b></p>
+        <p>Removal : {latest.particle_removal} %</p>
+        <p>Angle : {latest.contact_angle} °</p>
+      </>
+    ) : (
+      <p className="subtle">측정 데이터 없음</p>
+    )}
+
+   </div>
+
   </div>
- </div>
+ );
 }
 
 function UsersPage(){
