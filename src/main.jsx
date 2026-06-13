@@ -482,39 +482,61 @@ function Measure(){
          <th>시간</th>
          <th>수정자</th>
          <th>사유</th>
-         <th>Before</th>
-         <th>After</th>
+         <th colSpan="2">변경 내용</th>
         </tr>
        </thead>
 
-       <tbody>
-        {revisionRows.map(r=>
-         <tr key={r.id}>
-          <td>{r.edited_at}</td>
-          <td>{r.edited_by}</td>
-          <td>{r.reason}</td>
+<tbody>
+ {revisionRows.map((r)=>(
 
-        <td>
- <div>
-  <p><b>Run ID</b><br/>{r.before_value?.run_id}</p>
-  <p><b>Removal</b><br/>{r.before_value?.particle_removal}</p>
-  <p><b>Angle</b><br/>{r.before_value?.contact_angle}</p>
-  <p><b>Remark</b><br/>{r.before_value?.remark}</p>
- </div>
-</td>
+  <tr key={r.id}>
+   <td>{r.edited_at}</td>
+   <td>{r.edited_by}</td>
+   <td>{r.reason}</td>
 
-<td>
- <div>
-  <p><b>Run ID</b><br/>{r.after_value?.run_id}</p>
-  <p><b>Removal</b><br/>{r.after_value?.particle_removal}</p>
-  <p><b>Angle</b><br/>{r.after_value?.contact_angle}</p>
-  <p><b>Remark</b><br/>{r.after_value?.remark}</p>
- </div>
-</td>
+   <td colSpan="2">
+    <div style={{lineHeight:"1.8"}}>
 
-         </tr>
-        )}
-       </tbody>
+     <p>
+      <b>Run ID</b><br/>
+      {r.before_value?.run_id}
+      {" → "}
+      {r.after_value?.run_id}
+      {r.before_value?.run_id !== r.after_value?.run_id && " 🔶 변경"}
+     </p>
+
+     <p>
+      <b>Removal</b><br/>
+      {r.before_value?.particle_removal}
+      {" → "}
+      {r.after_value?.particle_removal}
+      {r.before_value?.particle_removal !== r.after_value?.particle_removal && " 🔶 변경"}
+     </p>
+
+     <p>
+      <b>Angle</b><br/>
+      {r.before_value?.contact_angle}
+      {" → "}
+      {r.after_value?.contact_angle}
+      {r.before_value?.contact_angle !== r.after_value?.contact_angle && " 🔶 변경"}
+     </p>
+
+     <p>
+      <b>Remark</b><br/>
+      {r.before_value?.remark}
+      {" → "}
+      {r.after_value?.remark}
+      {r.before_value?.remark !== r.after_value?.remark && " 🔶 변경"}
+     </p>
+
+    </div>
+   </td>
+
+  </tr>
+
+ ))}
+</tbody>
+
       </table>
      )}
     </div>
