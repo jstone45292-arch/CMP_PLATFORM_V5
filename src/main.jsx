@@ -266,6 +266,24 @@ function Measure(){
  const[contactAngle,setContactAngle]=useState("");
  const[remark,setRemark]=useState("");
 
+ const[rows,setRows]=useState([]);
+
+ useEffect(()=>{
+  loadMeasurements();
+ },[]);
+
+ async function loadMeasurements(){
+
+  const {data,error}=await supabase
+   .from("measurements")
+   .select("*")
+   .order("id",{ascending:false});
+
+  if(!error){
+   setRows(data||[]);
+  }
+ }
+
  async function saveMeasurement(){
 
   const {error}=await supabase
@@ -280,51 +298,103 @@ function Measure(){
    ]);
 
   if(error){
+
    alert("저장 실패 : "+error.message);
+
   }else{
+
    alert("저장 완료");
 
    setRunId("");
    setParticleRemoval("");
    setContactAngle("");
    setRemark("");
+
+   loadMeasurements();
   }
  }
 
- return <div className="card">
+ return (
 
-  <h2><Microscope/> Measurement</h2>
+ <div>
 
-  <label>Run ID</label>
-  <input
-   value={runId}
-   onChange={e=>setRunId(e.target.value)}
-   placeholder="RUN-001"
-  />
+  <div className="card">
 
-  <label>Particle Removal (%)</label>
-  <input
-   value={particleRemoval}
-   onChange={e=>setParticleRemoval(e.target.value)}
-  />
+   <h2><Microscope/> Measurement</h2>
 
-  <label>Contact Angle</label>
-  <input
-   value={contactAngle}
-   onChange={e=>setContactAngle(e.target.value)}
-  />
+   <label>Run ID</label>
+   <input
+    value={runId}
+    onChange={e=>setRunId(e.target.value)}
+    placeholder="TEST-001"
+   />
 
-  <label>Remark</label>
-  <textarea
-   value={remark}
-   onChange={e=>setRemark(e.target.value)}
-  />
+   <label>Particle Removal (%)</label>
+   <input
+    value={particleRemoval}
+    onChange={e=>setParticleRemoval(e.target.value)}
+   />
 
-  <button className="btn" onClick={saveMeasurement}>
-   저장 테스트
-  </button>
+   <label>Contact Angle</label>
+   <input
+    value={contactAngle}
+    onChange={e=>setContactAngle(e.target.value)}
+   />
+
+   <label>Remark</label>
+   <textarea
+    value={remark}
+    onChange={e=>setRemark(e.target.value)}
+   />
+
+   <button
+    className="btn"
+    onClick={saveMeasurement}
+   >
+    저장 테스트
+   </button>
+
+  </div>
+
+  <div className="card" style={{marginTop:"20px"}}>
+
+   <h2>최근 측정 목록</h2>
+
+   <table style={{width:"100%"}}>
+
+    <thead>
+     <tr>
+      <th>ID</th>
+      <th>Run ID</th>
+      <th>Removal</th>
+      <th>Angle</th>
+      <th>Remark</th>
+     </tr>
+    </thead>
+
+    <tbody>
+
+     {rows.map(row=>
+
+      <tr key={row.id}>
+       <td>{row.id}</td>
+       <td>{row.run_id}</td>
+       <td>{row.particle_removal}</td>
+       <td>{row.contact_angle}</td>
+       <td>{row.remark}</td>
+      </tr>
+
+     )}
+
+    </tbody>
+
+   </table>
+
+  </div>
 
  </div>
+
+ );
 }
 
 function Memo(){
