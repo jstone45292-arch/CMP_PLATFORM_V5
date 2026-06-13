@@ -287,32 +287,54 @@ function Measure(){
 
  async function saveMeasurement(){
 
-  const {error}=await supabase
-   .from("measurements")
-   .insert([
-    {
-      run_id:runId,
-      particle_removal:Number(particleRemoval),
-      contact_angle:Number(contactAngle),
-      remark:remark
-    }
-   ]);
+ let error;
 
-  if(error){
+if(editId){
 
-   alert("저장 실패 : "+error.message);
+ const result = await supabase
+  .from("measurements")
+  .update({
+   run_id: runId,
+   particle_removal: Number(particleRemoval),
+   contact_angle: Number(contactAngle),
+   remark: remark
+  })
+  .eq("id", editId);
 
-  }else{
+ error = result.error;
 
-   alert("저장 완료");
+}else{
 
-   setRunId("");
-   setParticleRemoval("");
-   setContactAngle("");
-   setRemark("");
+ const result = await supabase
+  .from("measurements")
+  .insert([
+   {
+    run_id: runId,
+    particle_removal: Number(particleRemoval),
+    contact_angle: Number(contactAngle),
+    remark: remark
+   }
+  ]);
 
-   loadMeasurements();
-  }
+ error = result.error;
+}
+
+if(error){
+
+ alert("저장 실패 : " + error.message);
+
+}else{
+
+ alert(editId ? "수정 완료" : "저장 완료");
+
+ setRunId("");
+ setParticleRemoval("");
+ setContactAngle("");
+ setRemark("");
+ setEditId(null);
+
+ loadMeasurements();
+}
  }
 
  return (
