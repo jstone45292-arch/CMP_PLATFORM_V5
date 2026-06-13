@@ -257,6 +257,8 @@ function Measure(){
  const[remark,setRemark]=useState("");
  const[rows,setRows]=useState([]);
  const[editId,setEditId]=useState(null);
+ const[revisionRows,setRevisionRows]=useState([]);
+ const[selectedMeasurementId,setSelectedMeasurementId]=useState(null);
 
  useEffect(()=>{
   loadMeasurements();
@@ -273,96 +275,97 @@ function Measure(){
   }
  }
 
-async function saveMeasurement(){
+ async function loadRevisions(measurementId){
+  setSelectedMeasurementId(measurementId);
 
- let error;
+  const{data,error}=await supabase
+   .from("measurement_revisions")
+   .select("*")
+   .eq("measurement_id",measurementId)
+   .order("edited_at",{ascending:false});
 
- if(editId){
-
-  const oldRow = rows.find(r => r.id === editId);
-
-  const reason = prompt("수정 사유를 입력하세요.");
-
-  if(!reason){
-   alert("수정 사유가 필요합니다.");
+  if(error){
+   alert("수정 이력 조회 실패 : "+error.message);
    return;
   }
 
-  const result = await supabase
-   .from("measurements")
-   .update({
-    run_id: runId,
-    particle_removal: Number(particleRemoval),
-    contact_angle: Number(contactAngle),
-    remark: remark
-   })
-   .eq("id", editId);
+  setRevisionRows(data||[]);
+ }
 
-  error = result.error;
+ async function saveMeasurement(){
+  if(editId){
+   const oldRow=rows.find(r=>r.id===editId);
+   const reason=prompt("수정 사유를 입력하세요.");
 
-  if(!error){
+   if(!reason){
+    alert("수정 사유가 필요합니다.");
+    return;
+   }
 
-   alert("revision insert 시작");
+   const result=await supabase
+    .from("measurements")
+    .update({
+     run_id:runId,
+     particle_removal:Number(particleRemoval),
+     contact_angle:Number(contactAngle),
+     remark:remark
+    })
+    .eq("id",editId);
 
-   const userResult = await supabase.auth.getUser();
-   const userEmail = userResult.data.user?.email || "unknown";
+   if(result.error){
+    alert("수정 실패 : "+result.error.message);
+    return;
+   }
 
-   const revisionResult = await supabase
+   const userResult=await supabase.auth.getUser();
+   const userEmail=userResult.data.user?.email||"unknown";
+
+   const revisionResult=await supabase
     .from("measurement_revisions")
     .insert([
      {
-      measurement_id: editId,
-      edited_by: userEmail,
-      reason: reason,
+      measurement_id:editId,
+      edited_by:userEmail,
+      reason:reason,
       before_value:{
-       run_id: oldRow.run_id,
-       particle_removal: oldRow.particle_removal,
-       contact_angle: oldRow.contact_angle,
-       remark: oldRow.remark
+       run_id:oldRow.run_id,
+       particle_removal:oldRow.particle_removal,
+       contact_angle:oldRow.contact_angle,
+       remark:oldRow.remark
       },
       after_value:{
-       run_id: runId,
-       particle_removal: Number(particleRemoval),
-       contact_angle: Number(contactAngle),
-       remark: remark
+       run_id:runId,
+       particle_removal:Number(particleRemoval),
+       contact_angle:Number(contactAngle),
+       remark:remark
       }
      }
     ]);
 
-   alert(
- "data=" + JSON.stringify(revisionResult.data)
- + "\n\nerror=" +
- JSON.stringify(revisionResult.error)
-);
+   if(revisionResult.error){
+    alert("수정 이력 저장 실패 : "+revisionResult.error.message);
+    return;
+   }
 
-if(revisionResult.error){
- alert("수정 이력 저장 실패 : " + revisionResult.error.message);
-}
+  }else{
+   const result=await supabase
+    .from("measurements")
+    .insert([
+     {
+      run_id:runId,
+      particle_removal:Number(particleRemoval),
+      contact_angle:Number(contactAngle),
+      remark:remark
+     }
+    ]);
+
+   if(result.error){
+    alert("저장 실패 : "+result.error.message);
+    return;
+   }
   }
 
- }else{
-
-  const result = await supabase
-   .from("measurements")
-   .insert([
-    {
-     run_id: runId,
-     particle_removal: Number(particleRemoval),
-     contact_angle: Number(contactAngle),
-     remark: remark
-    }
-   ]);
-
-  error = result.error;
- }
-
- if(error){
-
-  alert("저장 실패 : " + error.message);
-
- }else{
-
-  alert(editId ? "수정 완료" : "저장 완료");
+  alert(editId?"수정 완료":"저장 완료");
 
   setRunId("");
   setParticleRemoval("");
@@ -371,8 +374,12 @@ if(revisionResult.error){
   setEditId(null);
 
   loadMeasurements();
+
+  if(selectedMeasurementId){
+   loadRevisions(selectedMeasurementId);
+  }
  }
-}
+
  return (
   <div>
    <div className="card">
@@ -447,12 +454,62 @@ if(revisionResult.error){
          >
           수정
          </button>
+
+         <button
+          className="btn secondary"
+          style={{marginLeft:"8px"}}
+          onClick={()=>loadRevisions(row.id)}
+         >
+          이력
+         </button>
         </td>
        </tr>
       )}
      </tbody>
     </table>
    </div>
+
+   {selectedMeasurementId&&(
+    <div className="card" style={{marginTop:"20px"}}>
+     <h2>수정 이력 - Measurement ID {selectedMeasurementId}</h2>
+
+     {revisionRows.length===0 ? (
+      <p className="subtle">수정 이력이 없습니다.</p>
+     ) : (
+      <table style={{width:"100%"}}>
+       <thead>
+        <tr>
+         <th>시간</th>
+         <th>수정자</th>
+         <th>사유</th>
+         <th>Before</th>
+         <th>After</th>
+        </tr>
+       </thead>
+
+       <tbody>
+        {revisionRows.map(r=>
+         <tr key={r.id}>
+          <td>{r.edited_at}</td>
+          <td>{r.edited_by}</td>
+          <td>{r.reason}</td>
+          <td>
+           <pre style={{whiteSpace:"pre-wrap"}}>
+            {JSON.stringify(r.before_value,null,2)}
+           </pre>
+          </td>
+          <td>
+           <pre style={{whiteSpace:"pre-wrap"}}>
+            {JSON.stringify(r.after_value,null,2)}
+           </pre>
+          </td>
+         </tr>
+        )}
+       </tbody>
+      </table>
+     )}
+    </div>
+   )}
   </div>
  );
 }
