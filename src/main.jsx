@@ -1,4 +1,3 @@
-
 import React,{useEffect,useState}from"react";
 import{createRoot}from"react-dom/client";
 import{Database,FileSpreadsheet,FlaskConical,Gauge,LogOut,Microscope,ShieldCheck,User,Users}from"lucide-react";
@@ -35,11 +34,13 @@ function LoginCloud(){
  const[email,setEmail]=useState("");
  const[password,setPassword]=useState("");
  const[msg,setMsg]=useState("");
+
  async function signIn(){
   setMsg("로그인 중...");
   const {error}=await supabase.auth.signInWithPassword({email,password});
   setMsg(error?error.message:"로그인 성공");
  }
+
  return <div className="app"><div className="container">
   <Header title="CMP Platform v5.0 Cloud" sub="Supabase 로그인"/>
   <div className="card" style={{marginTop:16}}>
@@ -48,7 +49,7 @@ function LoginCloud(){
    <label>Password</label><input type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
    <button className="btn" onClick={signIn}>로그인</button>
    <p className="subtle">{msg}</p>
-   <div className="warn">Supabase에서 6명 계정을 먼저 만들어야 합니다. 무료 플랜으로 시작 가능합니다.</div>
+   <div className="warn">Supabase에서 6명 계정을 먼저 만들어야 합니다.</div>
   </div>
  </div></div>
 }
@@ -56,44 +57,271 @@ function LoginCloud(){
 function LocalMode({user,setUser,tab,setTab}){
  if(!user)return <div className="app"><div className="container">
   <Header title="CMP Platform v5.0 Cloud Package" sub="Supabase 설정 전 로컬 데모 모드"/>
-  <div className="grid cols3">{localUsers.map(u=><div className="card" key={u.email} onClick={()=>{setUser(u);localStorage.setItem("cmp_v5_local_user",JSON.stringify(u));}} style={{cursor:"pointer"}}>
-   <h2>{u.name}</h2><span className="badge">{u.role}</span><p className="subtle">{u.email}</p>
-  </div>)}</div>
-  <div className="note">.env에 Supabase URL/KEY를 넣으면 클라우드 로그인 모드로 전환됩니다.</div>
+  <div className="grid cols3">
+   {localUsers.map(u=>
+    <div className="card" key={u.email}
+      onClick={()=>{
+       setUser(u);
+       localStorage.setItem("cmp_v5_local_user",JSON.stringify(u));
+      }}
+      style={{cursor:"pointer"}}>
+      <h2>{u.name}</h2>
+      <span className="badge">{u.role}</span>
+      <p className="subtle">{u.email}</p>
+    </div>
+   )}
+  </div>
+  <div className="note">.env에 Supabase URL/KEY를 넣으면 클라우드 모드로 전환됩니다.</div>
  </div></div>
- return <Shell user={user} tab={tab} setTab={setTab} logout={()=>{localStorage.removeItem("cmp_v5_local_user");setUser(null)}} cloud={false}/>;
+
+ return <Shell
+   user={user}
+   tab={tab}
+   setTab={setTab}
+   logout={()=>{
+    localStorage.removeItem("cmp_v5_local_user");
+    setUser(null);
+   }}
+   cloud={false}
+ />;
 }
 
 function CloudMode({session,tab,setTab}){
- const user={name:session.user.email,role:"Cloud User",email:session.user.email};
- return <Shell user={user} tab={tab} setTab={setTab} logout={()=>supabase.auth.signOut()} cloud={true}/>;
+ const user={
+  name:session.user.email,
+  role:"Cloud User",
+  email:session.user.email
+ };
+
+ return <Shell
+   user={user}
+   tab={tab}
+   setTab={setTab}
+   logout={()=>supabase.auth.signOut()}
+   cloud={true}
+ />;
 }
 
 function Shell({user,tab,setTab,logout,cloud}){
- const tabs=["dashboard","users","materials","sop","slurry","doe","measure","memo","rules"];
+
+ const tabs=[
+  "dashboard",
+  "users",
+  "materials",
+  "sop",
+  "slurry",
+  "doe",
+  "measure",
+  "memo",
+  "rules"
+ ];
+
  return <div className="app"><div className="container">
-  <header className="header"><div><h1>CMP Platform v5.0 Cloud</h1><p>{cloud?"Cloud DB 연결":"Local demo mode"} · 6 Users · Lab Operation</p></div><div><span className="badge green">{user.name}</span><span className="badge purple">{user.role}</span><button className="btn secondary" onClick={logout}><LogOut size={16}/> 나가기</button></div></header>
-  <nav className="tabs">{tabs.map(t=><button className={"tab "+(tab===t?"active":"")} onClick={()=>setTab(t)} key={t}>{t.toUpperCase()}</button>)}</nav>
+
+  <header className="header">
+   <div>
+    <h1>CMP Platform v5.0 Cloud</h1>
+    <p>{cloud?"Cloud DB 연결":"Local demo mode"} · 6 Users · Lab Operation</p>
+   </div>
+
+   <div>
+    <span className="badge green">{user.name}</span>
+    <span className="badge purple">{user.role}</span>
+
+    <button className="btn secondary" onClick={logout}>
+      <LogOut size={16}/> 나가기
+    </button>
+   </div>
+  </header>
+
+  <nav className="tabs">
+   {tabs.map(t=>
+    <button
+      key={t}
+      className={"tab "+(tab===t?"active":"")}
+      onClick={()=>setTab(t)}
+    >
+      {t.toUpperCase()}
+    </button>
+   )}
+  </nav>
+
   {tab==="dashboard"&&<Dashboard cloud={cloud}/>}
   {tab==="users"&&<UsersPage/>}
   {tab==="materials"&&<Materials cloud={cloud}/>}
-  {tab==="sop"&&<Simple title="SOP" icon={<ShieldCheck/>} text="Manual Rubbing CMP-Mimic SOP v0.1: 200g, 20 strokes, 30mm, queue 3min."/>}
-  {tab==="slurry"&&<Simple title="Mock Slurry" icon={<FlaskConical/>} text="MS-SiO2-02: 1.0 wt%, 80–100 nm, pH 10.5."/>}
+  {tab==="sop"&&<Simple title="SOP" icon={<ShieldCheck/>} text="Manual Rubbing CMP-Mimic SOP"/>}
+  {tab==="slurry"&&<Simple title="Mock Slurry" icon={<FlaskConical/>} text="MS-SiO2-02: 1.0 wt%, 80–100 nm, pH 10.5"/>}
   {tab==="doe"&&<DOE/>}
   {tab==="measure"&&<Measure/>}
   {tab==="memo"&&<Memo/>}
   {tab==="rules"&&<Rules/>}
+
  </div></div>
 }
 
-function Header({title,sub}){return <header className="header"><div><h1>{title}</h1><p>{sub}</p></div><span className="badge green">v5.0</span></header>}
-function Dashboard({cloud}){return <div className="grid cols2"><div className="card"><h2><Database/> 상태</h2><p className="subtle">{cloud?"Supabase Cloud 연결 모드":"로컬 데모 모드"}</p><div className="note">v5.0 목표: 노트북 OFF 상태에서도 6명 접속 가능한 클라우드 기반.</div></div><div className="card"><h2>오늘 할 일</h2><ul><li>Supabase 프로젝트 생성</li><li>schema_v5_0.sql 실행</li><li>6명 계정 생성</li><li>Vercel 배포</li></ul></div></div>}
-function UsersPage(){return <div className="card"><h2><Users/> 초기 6명</h2><Table heads={["Name","Role","Email"]} rows={localUsers.map(u=>[u.name,u.role,u.email])}/></div>}
-function Materials({cloud}){const[rows,setRows]=useState([]);useEffect(()=>{if(cloud)load();else setRows([["MAT-0001","Triton X-100","Surfactant","Low"],["MAT-0011","EDTA","Chelator","High"],["MAT-0012","GLDA","Chelator","Low"],["MAT-0021","BTA","Inhibitor","Low"]])},[cloud]);async function load(){const {data}=await supabase.from("materials").select("material_id,material_name,category,corrosion_risk").limit(50);setRows((data||[]).map(r=>[r.material_id,r.material_name,r.category,r.corrosion_risk]));}return <div className="card"><h2><Database/> Materials</h2><Table heads={["ID","Material","Category","Corrosion Risk"]} rows={rows}/></div>}
-function DOE(){return <div className="card"><h2><FileSpreadsheet/> DOE</h2><Table heads={["Run","Slurry","Surfactant","Chelator","pH","Status"]} rows={[["RUN-001","MS-SiO2-02","Triton","IDA","11.5","Plan"],["RUN-002","MS-SiO2-02","Tween","GLDA","11.5","Plan"],["RUN-003","MS-SiO2-02","Brij","GLDA","12.2","Review"]]}/></div>}
-function Measure(){return <div className="card"><h2><Microscope/> Measurement</h2><label>Run ID</label><input placeholder="RUN-001"/><label>Particle Removal (%)</label><input/><label>Contact Angle</label><input/><label>Remark</label><textarea/><button className="btn">저장 테스트</button></div>}
-function Memo(){return <div className="card"><h2>Memo</h2><textarea placeholder="교수님 검토 / 대표님 메모 / 학생 특이사항 / 다음 DOE 제안"/><div className="note">Cloud 저장은 Supabase 연결 후 memos 테이블에 저장됩니다.</div></div>}
-function Rules(){return <div className="card"><h2>Decision Rules</h2><Table heads={["Rule","Condition","Recommendation"]} rows={[["RULE-001","pH > 11.5 AND EDTA","Cu corrosion risk HIGH"],["RULE-002","Nonionic + HLB 12~16","Good wetting candidate"],["RULE-003","GLDA + BTA","Eco-friendly Cu cleaning candidate"]]}/></div>}
-function Simple({title,icon,text}){return <div className="card"><h2>{icon} {title}</h2><p className="subtle">{text}</p></div>}
-function Table({heads,rows}){return <div className="tablewrap"><table><thead><tr>{heads.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div>}
+function Header({title,sub}){
+ return <header className="header">
+  <div>
+   <h1>{title}</h1>
+   <p>{sub}</p>
+  </div>
+  <span className="badge green">v5.0</span>
+ </header>
+}
+
+function Dashboard({cloud}){
+ return <div className="grid cols2">
+  <div className="card">
+   <h2><Database/> 상태</h2>
+   <p className="subtle">{cloud?"Supabase Cloud 연결 모드":"로컬 데모 모드"}</p>
+  </div>
+ </div>
+}
+
+function UsersPage(){
+ return <div className="card">
+  <h2><Users/> 초기 6명</h2>
+  <Table heads={["Name","Role","Email"]} rows={localUsers.map(u=>[u.name,u.role,u.email])}/>
+ </div>
+}
+
+function Materials({cloud}){
+
+ const[rows,setRows]=useState([]);
+
+ useEffect(()=>{
+  if(cloud)load();
+ },[cloud]);
+
+ async function load(){
+  const {data}=await supabase
+   .from("materials")
+   .select("material_id,material_name,category,corrosion_risk");
+
+  setRows((data||[]).map(r=>[
+   r.material_id,
+   r.material_name,
+   r.category,
+   r.corrosion_risk
+  ]));
+ }
+
+ return <div className="card">
+  <h2><Database/> Materials</h2>
+  <Table heads={["ID","Material","Category","Corrosion Risk"]} rows={rows}/>
+ </div>
+}
+
+function DOE(){
+ return <div className="card">
+  <h2><FileSpreadsheet/> DOE</h2>
+ </div>
+}
+
+function Measure(){
+
+ const[runId,setRunId]=useState("");
+ const[particleRemoval,setParticleRemoval]=useState("");
+ const[contactAngle,setContactAngle]=useState("");
+ const[remark,setRemark]=useState("");
+
+ async function saveMeasurement(){
+
+  const {error}=await supabase
+   .from("measurements")
+   .insert([
+    {
+      run_id:runId,
+      particle_removal:Number(particleRemoval),
+      contact_angle:Number(contactAngle),
+      remark:remark
+    }
+   ]);
+
+  if(error){
+   alert("저장 실패 : "+error.message);
+  }else{
+   alert("저장 완료");
+
+   setRunId("");
+   setParticleRemoval("");
+   setContactAngle("");
+   setRemark("");
+  }
+ }
+
+ return <div className="card">
+
+  <h2><Microscope/> Measurement</h2>
+
+  <label>Run ID</label>
+  <input
+   value={runId}
+   onChange={e=>setRunId(e.target.value)}
+   placeholder="RUN-001"
+  />
+
+  <label>Particle Removal (%)</label>
+  <input
+   value={particleRemoval}
+   onChange={e=>setParticleRemoval(e.target.value)}
+  />
+
+  <label>Contact Angle</label>
+  <input
+   value={contactAngle}
+   onChange={e=>setContactAngle(e.target.value)}
+  />
+
+  <label>Remark</label>
+  <textarea
+   value={remark}
+   onChange={e=>setRemark(e.target.value)}
+  />
+
+  <button className="btn" onClick={saveMeasurement}>
+   저장 테스트
+  </button>
+
+ </div>
+}
+
+function Memo(){
+ return <div className="card">
+  <h2>Memo</h2>
+ </div>
+}
+
+function Rules(){
+ return <div className="card">
+  <h2>Decision Rules</h2>
+ </div>
+}
+
+function Simple({title,icon,text}){
+ return <div className="card">
+  <h2>{icon} {title}</h2>
+  <p>{text}</p>
+ </div>
+}
+
+function Table({heads,rows}){
+ return <div className="tablewrap">
+  <table>
+   <thead>
+    <tr>
+     {heads.map(h=><th key={h}>{h}</th>)}
+    </tr>
+   </thead>
+   <tbody>
+    {rows.map((r,i)=>
+      <tr key={i}>
+       {r.map((c,j)=><td key={j}>{c}</td>)}
+      </tr>
+    )}
+   </tbody>
+  </table>
+ </div>
+}
+
 createRoot(document.getElementById("root")).render(<App/>);
