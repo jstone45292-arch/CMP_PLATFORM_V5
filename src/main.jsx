@@ -302,6 +302,8 @@ async function saveMeasurement(){
 
   if(!error){
 
+   alert("revision insert 시작");
+
    const userResult = await supabase.auth.getUser();
    const userEmail = userResult.data.user?.email || "unknown";
 
