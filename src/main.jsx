@@ -329,9 +329,15 @@ async function saveMeasurement(){
      }
     ]);
 
-   if(revisionResult.error){
-    alert("수정 이력 저장 실패 : " + revisionResult.error.message);
-   }
+   alert(
+ "data=" + JSON.stringify(revisionResult.data)
+ + "\n\nerror=" +
+ JSON.stringify(revisionResult.error)
+);
+
+if(revisionResult.error){
+ alert("수정 이력 저장 실패 : " + revisionResult.error.message);
+}
   }
 
  }else{
