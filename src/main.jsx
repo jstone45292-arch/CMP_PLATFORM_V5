@@ -1,6 +1,6 @@
 import React,{useEffect,useState}from"react";
 import{createRoot}from"react-dom/client";
-import{Database,FileSpreadsheet,FlaskConical,Gauge,LogOut,Microscope,ShieldCheck,User,Users}from"lucide-react";
+import{Database,FileSpreadsheet,FlaskConical,LogOut,Microscope,ShieldCheck,Users}from"lucide-react";
 import{supabase,supabaseConfigured}from"./supabaseClient";
 import"./style.css";
 
@@ -25,8 +25,8 @@ function App(){
   return()=>subscription.unsubscribe();
  },[]);
 
- if(!supabaseConfigured) return <LocalMode user={localUser} setUser={setLocalUser} tab={tab} setTab={setTab}/>;
- if(!session) return <LoginCloud/>;
+ if(!supabaseConfigured)return <LocalMode user={localUser} setUser={setLocalUser} tab={tab} setTab={setTab}/>;
+ if(!session)return <LoginCloud/>;
  return <CloudMode session={session} tab={tab} setTab={setTab}/>;
 }
 
@@ -37,7 +37,7 @@ function LoginCloud(){
 
  async function signIn(){
   setMsg("로그인 중...");
-  const {error}=await supabase.auth.signInWithPassword({email,password});
+  const{error}=await supabase.auth.signInWithPassword({email,password});
   setMsg(error?error.message:"로그인 성공");
  }
 
@@ -51,7 +51,7 @@ function LoginCloud(){
    <p className="subtle">{msg}</p>
    <div className="warn">Supabase에서 6명 계정을 먼저 만들어야 합니다.</div>
   </div>
- </div></div>
+ </div></div>;
 }
 
 function LocalMode({user,setUser,tab,setTab}){
@@ -60,29 +60,29 @@ function LocalMode({user,setUser,tab,setTab}){
   <div className="grid cols3">
    {localUsers.map(u=>
     <div className="card" key={u.email}
-      onClick={()=>{
-       setUser(u);
-       localStorage.setItem("cmp_v5_local_user",JSON.stringify(u));
-      }}
-      style={{cursor:"pointer"}}>
-      <h2>{u.name}</h2>
-      <span className="badge">{u.role}</span>
-      <p className="subtle">{u.email}</p>
+     onClick={()=>{
+      setUser(u);
+      localStorage.setItem("cmp_v5_local_user",JSON.stringify(u));
+     }}
+     style={{cursor:"pointer"}}>
+     <h2>{u.name}</h2>
+     <span className="badge">{u.role}</span>
+     <p className="subtle">{u.email}</p>
     </div>
    )}
   </div>
   <div className="note">.env에 Supabase URL/KEY를 넣으면 클라우드 모드로 전환됩니다.</div>
- </div></div>
+ </div></div>;
 
  return <Shell
-   user={user}
-   tab={tab}
-   setTab={setTab}
-   logout={()=>{
-    localStorage.removeItem("cmp_v5_local_user");
-    setUser(null);
-   }}
-   cloud={false}
+  user={user}
+  tab={tab}
+  setTab={setTab}
+  logout={()=>{
+   localStorage.removeItem("cmp_v5_local_user");
+   setUser(null);
+  }}
+  cloud={false}
  />;
 }
 
@@ -94,16 +94,15 @@ function CloudMode({session,tab,setTab}){
  };
 
  return <Shell
-   user={user}
-   tab={tab}
-   setTab={setTab}
-   logout={()=>supabase.auth.signOut()}
-   cloud={true}
+  user={user}
+  tab={tab}
+  setTab={setTab}
+  logout={()=>supabase.auth.signOut()}
+  cloud={true}
  />;
 }
 
 function Shell({user,tab,setTab,logout,cloud}){
-
  const tabs=[
   "dashboard",
   "users",
@@ -117,7 +116,6 @@ function Shell({user,tab,setTab,logout,cloud}){
  ];
 
  return <div className="app"><div className="container">
-
   <header className="header">
    <div>
     <h1>CMP Platform v5.0 Cloud</h1>
@@ -129,7 +127,7 @@ function Shell({user,tab,setTab,logout,cloud}){
     <span className="badge purple">{user.role}</span>
 
     <button className="btn secondary" onClick={logout}>
-      <LogOut size={16}/> 나가기
+     <LogOut size={16}/> 나가기
     </button>
    </div>
   </header>
@@ -137,11 +135,11 @@ function Shell({user,tab,setTab,logout,cloud}){
   <nav className="tabs">
    {tabs.map(t=>
     <button
-      key={t}
-      className={"tab "+(tab===t?"active":"")}
-      onClick={()=>setTab(t)}
+     key={t}
+     className={"tab "+(tab===t?"active":"")}
+     onClick={()=>setTab(t)}
     >
-      {t.toUpperCase()}
+     {t.toUpperCase()}
     </button>
    )}
   </nav>
@@ -155,8 +153,7 @@ function Shell({user,tab,setTab,logout,cloud}){
   {tab==="measure"&&<Measure/>}
   {tab==="memo"&&<Memo/>}
   {tab==="rules"&&<Rules/>}
-
- </div></div>
+ </div></div>;
 }
 
 function Header({title,sub}){
@@ -166,55 +163,50 @@ function Header({title,sub}){
    <p>{sub}</p>
   </div>
   <span className="badge green">v5.0</span>
- </header>
+ </header>;
 }
 
 function Dashboard({cloud}){
-
- const [latest,setLatest]=useState(null);
+ const[latest,setLatest]=useState(null);
 
  useEffect(()=>{
-  if(cloud) load();
+  if(cloud)load();
  },[]);
 
  async function load(){
-
-  const {data,error}=await supabase
+  const{data,error}=await supabase
    .from("measurements")
    .select("*")
    .order("id",{ascending:false})
    .limit(1);
 
-  if(!error && data?.length){
+  if(!error&&data?.length){
    setLatest(data[0]);
   }
  }
 
  return (
   <div className="grid cols2">
-
    <div className="card">
     <h2><Database size={20}/> Database 상태</h2>
     <p className="subtle">
-      {cloud ? "Supabase Cloud 연결 모드" : "로컬 데모 모드"}
+     {cloud?"Supabase Cloud 연결 모드":"로컬 데모 모드"}
     </p>
    </div>
 
    <div className="card">
     <h2><Microscope size={20}/> 최근 측정</h2>
 
-    {latest ? (
-      <>
-        <p><b>{latest.run_id}</b></p>
-        <p>Removal : {latest.particle_removal} %</p>
-        <p>Angle : {latest.contact_angle} °</p>
-      </>
-    ) : (
-      <p className="subtle">측정 데이터 없음</p>
+    {latest?(
+     <>
+      <p><b>{latest.run_id}</b></p>
+      <p>Removal : {latest.particle_removal} %</p>
+      <p>Angle : {latest.contact_angle} °</p>
+     </>
+    ):(
+     <p className="subtle">측정 데이터 없음</p>
     )}
-
    </div>
-
   </div>
  );
 }
@@ -223,11 +215,10 @@ function UsersPage(){
  return <div className="card">
   <h2><Users/> 초기 6명</h2>
   <Table heads={["Name","Role","Email"]} rows={localUsers.map(u=>[u.name,u.role,u.email])}/>
- </div>
+ </div>;
 }
 
 function Materials({cloud}){
-
  const[rows,setRows]=useState([]);
 
  useEffect(()=>{
@@ -235,7 +226,7 @@ function Materials({cloud}){
  },[cloud]);
 
  async function load(){
-  const {data}=await supabase
+  const{data}=await supabase
    .from("materials")
    .select("material_id,material_name,category,corrosion_risk");
 
@@ -250,22 +241,20 @@ function Materials({cloud}){
  return <div className="card">
   <h2><Database/> Materials</h2>
   <Table heads={["ID","Material","Category","Corrosion Risk"]} rows={rows}/>
- </div>
+ </div>;
 }
 
 function DOE(){
  return <div className="card">
   <h2><FileSpreadsheet/> DOE</h2>
- </div>
+ </div>;
 }
 
 function Measure(){
-
  const[runId,setRunId]=useState("");
  const[particleRemoval,setParticleRemoval]=useState("");
  const[contactAngle,setContactAngle]=useState("");
  const[remark,setRemark]=useState("");
-
  const[rows,setRows]=useState([]);
  const[editId,setEditId]=useState(null);
 
@@ -274,8 +263,7 @@ function Measure(){
  },[]);
 
  async function loadMeasurements(){
-
-  const {data,error}=await supabase
+  const{data,error}=await supabase
    .from("measurements")
    .select("*")
    .order("id",{ascending:false});
@@ -286,180 +274,151 @@ function Measure(){
  }
 
  async function saveMeasurement(){
+  let error;
 
- let error;
+  if(editId){
+   const result=await supabase
+    .from("measurements")
+    .update({
+     run_id:runId,
+     particle_removal:Number(particleRemoval),
+     contact_angle:Number(contactAngle),
+     remark:remark
+    })
+    .eq("id",editId);
 
-if(editId){
+   error=result.error;
+  }else{
+   const result=await supabase
+    .from("measurements")
+    .insert([
+     {
+      run_id:runId,
+      particle_removal:Number(particleRemoval),
+      contact_angle:Number(contactAngle),
+      remark:remark
+     }
+    ]);
 
- const result = await supabase
-  .from("measurements")
-  .update({
-   run_id: runId,
-   particle_removal: Number(particleRemoval),
-   contact_angle: Number(contactAngle),
-   remark: remark
-  })
-  .eq("id", editId);
+   error=result.error;
+  }
 
- error = result.error;
+  if(error){
+   alert("저장 실패 : "+error.message);
+  }else{
+   alert(editId?"수정 완료":"저장 완료");
 
-}else{
+   setRunId("");
+   setParticleRemoval("");
+   setContactAngle("");
+   setRemark("");
+   setEditId(null);
 
- const result = await supabase
-  .from("measurements")
-  .insert([
-   {
-    run_id: runId,
-    particle_removal: Number(particleRemoval),
-    contact_angle: Number(contactAngle),
-    remark: remark
-   }
-  ]);
-
- error = result.error;
-}
-
-if(error){
-
- alert("저장 실패 : " + error.message);
-
-}else{
-
- alert(editId ? "수정 완료" : "저장 완료");
-
- setRunId("");
- setParticleRemoval("");
- setContactAngle("");
- setRemark("");
- setEditId(null);
-
- loadMeasurements();
-}
+   loadMeasurements();
+  }
  }
 
  return (
+  <div>
+   <div className="card">
+    <h2><Microscope/> Measurement</h2>
 
- <div>
+    <label>Run ID</label>
+    <input
+     value={runId}
+     onChange={e=>setRunId(e.target.value)}
+     placeholder="TEST-001"
+    />
 
-  <div className="card">
+    <label>Particle Removal (%)</label>
+    <input
+     value={particleRemoval}
+     onChange={e=>setParticleRemoval(e.target.value)}
+    />
 
-   <h2><Microscope/> Measurement</h2>
+    <label>Contact Angle</label>
+    <input
+     value={contactAngle}
+     onChange={e=>setContactAngle(e.target.value)}
+    />
 
-   <label>Run ID</label>
-   <input
-    value={runId}
-    onChange={e=>setRunId(e.target.value)}
-    placeholder="TEST-001"
-   />
+    <label>Remark</label>
+    <textarea
+     value={remark}
+     onChange={e=>setRemark(e.target.value)}
+    />
 
-   <label>Particle Removal (%)</label>
-   <input
-    value={particleRemoval}
-    onChange={e=>setParticleRemoval(e.target.value)}
-   />
+    <button
+     className="btn"
+     onClick={saveMeasurement}
+    >
+     {editId?"수정 저장":"TEST 저장"}
+    </button>
+   </div>
 
-   <label>Contact Angle</label>
-   <input
-    value={contactAngle}
-    onChange={e=>setContactAngle(e.target.value)}
-   />
+   <div className="card" style={{marginTop:"20px"}}>
+    <h2>최근 측정 목록</h2>
 
-   <label>Remark</label>
-   <textarea
-    value={remark}
-    onChange={e=>setRemark(e.target.value)}
-   />
+    <table style={{width:"100%"}}>
+     <thead>
+      <tr>
+       <th>ID</th>
+       <th>Run ID</th>
+       <th>Removal</th>
+       <th>Angle</th>
+       <th>Remark</th>
+       <th>Action</th>
+      </tr>
+     </thead>
 
-   <button
-    className="btn"
-    onClick={saveMeasurement}
-   >
-    저장 테스트
-   </button>
-
+     <tbody>
+      {rows.map(row=>
+       <tr key={row.id}>
+        <td>{row.id}</td>
+        <td>{row.run_id}</td>
+        <td>{row.particle_removal}</td>
+        <td>{row.contact_angle}</td>
+        <td>{row.remark}</td>
+        <td>
+         <button
+          className="btn"
+          onClick={()=>{
+           setEditId(row.id);
+           setRunId(row.run_id);
+           setParticleRemoval(row.particle_removal);
+           setContactAngle(row.contact_angle);
+           setRemark(row.remark||"");
+          }}
+         >
+          수정
+         </button>
+        </td>
+       </tr>
+      )}
+     </tbody>
+    </table>
+   </div>
   </div>
-
-  <div className="card" style={{marginTop:"20px"}}>
-
-   <h2>최근 측정 목록</h2>
-
-   <table style={{width:"100%"}}>
-
-<thead>
- <tr>
-  <th>ID</th>
-  <th>Run ID</th>
-  <th>Removal</th>
-  <th>Angle</th>
-  <th>Remark</th>
-  <th>Action</th>
- </tr>
-</thead>
-
-    <tbody>
-
-     {rows.map(row=>
-
- <tr key={row.id}>
-
- <td>{row.id}</td>
- <td>{row.run_id}</td>
- <td>{row.particle_removal}</td>
- <td>{row.contact_angle}</td>
- <td>{row.remark}</td>
-
- <td>
-
-<button
- className="btn"
- onClick={()=>{
-
-  setEditId(row.id);
-
-  setRunId(row.run_id);
-  setParticleRemoval(row.particle_removal);
-  setContactAngle(row.contact_angle);
-  setRemark(row.remark||"");
-
- }}
->
-수정
-</button>
-
- </td>
-
-</tr>
-
-     )}
-
-    </tbody>
-
-   </table>
-
-  </div>
-
- </div>
-
  );
 }
 
 function Memo(){
  return <div className="card">
   <h2>Memo</h2>
- </div>
+ </div>;
 }
 
 function Rules(){
  return <div className="card">
   <h2>Decision Rules</h2>
- </div>
+ </div>;
 }
 
 function Simple({title,icon,text}){
  return <div className="card">
   <h2>{icon} {title}</h2>
   <p>{text}</p>
- </div>
+ </div>;
 }
 
 function Table({heads,rows}){
@@ -472,13 +431,13 @@ function Table({heads,rows}){
    </thead>
    <tbody>
     {rows.map((r,i)=>
-      <tr key={i}>
-       {r.map((c,j)=><td key={j}>{c}</td>)}
-      </tr>
+     <tr key={i}>
+      {r.map((c,j)=><td key={j}>{c}</td>)}
+     </tr>
     )}
    </tbody>
   </table>
- </div>
+ </div>;
 }
 
 createRoot(document.getElementById("root")).render(<App/>);
