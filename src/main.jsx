@@ -493,16 +493,25 @@ function Measure(){
           <td>{r.edited_at}</td>
           <td>{r.edited_by}</td>
           <td>{r.reason}</td>
-          <td>
-           <pre style={{whiteSpace:"pre-wrap"}}>
-            {JSON.stringify(r.before_value,null,2)}
-           </pre>
-          </td>
-          <td>
-           <pre style={{whiteSpace:"pre-wrap"}}>
-            {JSON.stringify(r.after_value,null,2)}
-           </pre>
-          </td>
+
+        <td>
+ <div>
+  <p><b>Run ID</b><br/>{r.before_value?.run_id}</p>
+  <p><b>Removal</b><br/>{r.before_value?.particle_removal}</p>
+  <p><b>Angle</b><br/>{r.before_value?.contact_angle}</p>
+  <p><b>Remark</b><br/>{r.before_value?.remark}</p>
+ </div>
+</td>
+
+<td>
+ <div>
+  <p><b>Run ID</b><br/>{r.after_value?.run_id}</p>
+  <p><b>Removal</b><br/>{r.after_value?.particle_removal}</p>
+  <p><b>Angle</b><br/>{r.after_value?.contact_angle}</p>
+  <p><b>Remark</b><br/>{r.after_value?.remark}</p>
+ </div>
+</td>
+
          </tr>
         )}
        </tbody>
