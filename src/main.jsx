@@ -303,25 +303,21 @@ async function saveMeasurement(){
   if(!error){
 
    const userResult = await supabase.auth.getUser();
+   const userEmail = userResult.data.user?.email || "unknown";
 
-   const userEmail =
-    userResult.data.user?.email || "unknown";
-
-   await supabase
+   const revisionResult = await supabase
     .from("measurement_revisions")
     .insert([
      {
       measurement_id: editId,
       edited_by: userEmail,
       reason: reason,
-
       before_value:{
        run_id: oldRow.run_id,
        particle_removal: oldRow.particle_removal,
        contact_angle: oldRow.contact_angle,
        remark: oldRow.remark
       },
-
       after_value:{
        run_id: runId,
        particle_removal: Number(particleRemoval),
@@ -330,6 +326,10 @@ async function saveMeasurement(){
       }
      }
     ]);
+
+   if(revisionResult.error){
+    alert("수정 이력 저장 실패 : " + revisionResult.error.message);
+   }
   }
 
  }else{
